@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class TbUser extends Migration
+{
+    public function up()
+    {
+        //membuat table user
+        $this->forge->addField([
+            'id_user' =>[
+                'type'=>'INT',
+                'constraint'=>'11',
+                'auto_increment'=>true,
+                'unsigned'=>true,
+            ], 
+            'username' =>[
+                'type' =>'VARCHAR',
+                'constraint'=>'15',
+            ],
+            'password' =>[
+                'type' =>'VARCHAR',
+                'constraint'=>'255',
+            ],
+            'status' => [
+                'type' => 'ENUM',
+                'constraint' => ['admin', 'petugas'],
+                'default' => 'admin',
+            ],
+            'created_at' =>[
+                'type' =>'DATETIME',
+                'null'=>true,
+            ],
+            'updated_at' =>[
+                'type' =>'DATETIME',
+                'null'=>true,
+            ],   
+            'deleted_at' =>[
+                'type' =>'DATETIME',
+                'null'=>true,
+            ],      
+        ]);
+        $this->forge->addPrimaryKey('id_user');
+        $this->forge->createTable('tb_user');
+    }
+    
+
+    public function down()
+    {
+        //menghapus table outlet
+        $this->forge->dropTable('tb_user');
+    }
+}
+
+
+

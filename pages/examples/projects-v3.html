@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Controllers\BaseController;
+use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\ModelUser; 
+
+class User extends BaseController
+{
+    protected $user; 
+ 
+    function __construct() 
+    { 
+        $this->user = new ModelUser(); 
+    } 
+ 
+    public function index() 
+    { 
+        return view('userv'); 
+    } 
+ 
+    public function tampil() 
+    { 
+        $data = $this->user->findAll(); 
+ 
+        return json_encode($data); //data dirubah menjadi json 
+    } 
+ 
+    public function simpan() 
+    { 
+        $this->user->insert([ 
+            'username' => $this->request->getVar('username'), 
+            'password' => $this->request->getVar('password'), 
+            'role' => $this->request->getVar('role') 
+        ]); 
+ 
+        return 'sukses'; 
+    } 
+ 
+    public function edit() 
+    { 
+        $id_user = $this->request->getVar('id_user'); 
+        $data = $this->user->find($id_user); 
+ 
+        return json_encode($data); 
+    } 
+ 
+    public function update() 
+    { 
+        $id_user = $this->request->getVar('id_user'); 
+ 
+        $this->user->update($id_user, [ 
+            'username' => $this->request->getVar('username'), 
+            'password' => $this->request->getVar('password'), 
+            'role' => $this->request->getVar('role'), 
+        ]); 
+    } 
+ 
+    public function delete() 
+    { 
+        $id_user = $this->request->getVar('id_user'); 
+        $this->user->delete($id_user); 
+    } 
+}
+
+<?php 
+ 
+namespace App\Controllers; 
+ 
+use App\Controllers\BaseController; 
+use App\Models\ModelUser; 
+ 
+class Login extends BaseController 
+{ 
+    public function index() 
+    { 
+        if(session('username')){ 
+            return redirect()->to(base_url('/produk')); 
+        } 
+         
+        return view("loginv"); 
+    } 
+ 
+    public function prosesLogin() 
+    { 
+        $users = new ModelUser(); 
+        $username = $this->request->getVar("username"); 
+        $password = $this->request->getVar("password"); 
+        $dataUser = $users->where("username", $username)->first(); 
+ 
+        if ($dataUser) 
+        { 
+            if(password_verify($password, $dataUser->password)){ 
+                session()->set([ 
+                    "username"=> $dataUser->username, 
+                    "logged_in" => true, 
+                    "role" => $dataUser->role, 
+                    
+                    //"nama_user" => $dataUser->nama_user 
+                ]); 
+                
+                return redirect()->to(base_url('/produk')); 
+            }else { 
+                session()->setFlashdata('error', 'Password Salah'); 
+                return redirect()->to(previous_url())->withInput(); 
+            } 
+        } else 
+        { 
+            session()->setFlashdata('error','Username dan Password Salah'); 
+            return redirect()->to(previous_url())->withInput(); 
+        } 
+        
+    } 
+ 
+    public function logout() 
+    { 
+        // Hapus data sesi yang terkait dengan login 
+        session()->remove('username'); 
+        session()->remove('logged_in'); 
+        session()->remove('role'); 
+        //session()->remove('nama_user'); 
+ 
+        // Redirect ke halaman login atau halaman lain yang diinginkan 
+        return redirect()->to(base_url('/login')); 
+    } 
+}
